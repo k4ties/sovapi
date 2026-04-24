@@ -50,7 +50,7 @@ func (api *API) Player(ctx context.Context, id int) (PlayerResponse, error) {
 //
 // /api/player/search/{query}
 func (api *API) PlayerSearch(ctx context.Context, query string) (PlayerSearchResponse, error) {
-	if utf8.RuneCount(([]byte)(query)) < 2 {
+	if utf8.RuneCountInString(query) < 2 {
 		return PlayerSearchResponse{}, ErrNicknameMustBeTwoChars
 	}
 	resp, err := getAndUnmarshalf[PlayerSearchResponse](api, ctx, "player/search/%s", query)
