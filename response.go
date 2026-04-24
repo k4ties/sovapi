@@ -32,12 +32,6 @@ type PracticeModeResponse struct {
 
 // practice/statistics/elo/{player_id}
 
-type RankedPlayerStatistic struct {
-	ID       int    `json:"id"`
-	Nickname string `json:"nickname"`
-	Elo      int    `json:"amount"`
-}
-
 type RankedModeStatistic struct {
 	ModeID   int    `json:"mode_id"`
 	ModeName string `json:"mode_name"`
@@ -49,6 +43,12 @@ type PracticeStatisticsEloResponse struct {
 }
 
 // practice/statistics/leaderboard/elo/{mode_id}
+
+type RankedPlayerStatistic struct {
+	ID       int    `json:"id"`
+	Nickname string `json:"nickname"`
+	Elo      int    `json:"amount"`
+}
 
 type StatisticsEloLeaderboardResponse struct {
 	Data []RankedPlayerStatistic `json:"data"`
