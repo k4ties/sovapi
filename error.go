@@ -5,6 +5,8 @@ import (
 	"regexp"
 )
 
+var _ error = (*ResponseError)(nil)
+
 type ResponseError struct {
 	Message string `json:"message"`
 }
