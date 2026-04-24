@@ -133,7 +133,7 @@ func unmarshalResponseError(data []byte) (error, bool) {
 	if err := json.Unmarshal(data, &resp); err != nil || resp.Message == "" {
 		return nil, false
 	}
-	if err, ok := parseError(resp.Message); ok {
+	if err := parseError(resp.Message); err != nil {
 		return err, true
 	}
 	return resp, true

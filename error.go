@@ -29,18 +29,18 @@ var (
 	regModeNotFound   = regexp.MustCompile(`No query results for model \[App\\Models\\Practice\\PracticeMode] .*`)
 )
 
-func parseError(message string) (error, bool) {
+func parseError(message string) error {
 	switch {
 	case message == "Nickname must be at least 2 characters long":
-		return ErrNicknameMustBeTwoChars, true
+		return ErrNicknameMustBeTwoChars
 	case message == "Server Error":
-		return ErrServerError, true
+		return ErrServerError
 	case regPlayerNotFound.MatchString(message):
-		return ErrCannotFindPlayer, true //todo: pass id
+		return ErrCannotFindPlayer //todo: pass id
 	case regModeNotFound.MatchString(message):
-		return ErrNoSuchMode, true // ...
+		return ErrNoSuchMode // ...
 	case regRouteNotFound.MatchString(message):
-		return ErrRouteNotFound, true // ...
+		return ErrRouteNotFound // ...
 	}
-	return nil, false
+	return nil
 }
