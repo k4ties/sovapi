@@ -2,25 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"math/rand/v2"
 	"os/signal"
 	"syscall"
 
 	sova "github.com/k4ties/sovapi"
-)
-
-// нодебаф модерн ранкед = 1
-// нодебаф лоу = 2
-// нодебаф хайгх = 3
-// гэпл ранкед = 4
-// мидфайт ранкед = 5
-
-const (
-	NoDebuffModernRanked = iota + 1
-	_
-	_
-	GAppleRanked
-	MidFightRanked
+	"github.com/kr/pretty"
 )
 
 func main() {
@@ -29,11 +18,23 @@ func main() {
 
 	api := sova.NewAPI()
 
-	resp, err := api.PracticeStatisticsLeaderboardElo(ctx, NoDebuffModernRanked)
+	mode := randomRankedMode(api, ctx)
+	fmt.Printf("mode_id=%d ; mode_name=%q\n", mode.ID, mode.Name)
+
+	resp, err := api.PracticeStatisticsLeaderboardElo(ctx, mode.ID)
 	if err != nil {
-		panic(fmt.Errorf("do player search: %w", err))
+		panic(fmt.Errorf("call /practice/statistics/leaderboard/elo: %w", err))
 	}
-	for i, p := range resp.Data {
-		fmt.Printf("%d) %s (%d)\n", i+1, p.Nickname, p.Elo)
+	_, _ = pretty.Println(resp)
+}
+
+func randomRankedMode(api *sova.API, ctx context.Context) sova.PracticeMode {
+	resp, err := api.PracticeModeRanked(ctx)
+	if err != nil {
+		panic(fmt.Errorf("call /practice/mode: %w", err))
 	}
+	if len(resp.Data) == 0 {
+		panic(errors.New("/api/practice/mode/: 0 modes in response"))
+	}
+	return resp.Data[rand.IntN(len(resp.Data))]
 }

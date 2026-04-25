@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	sova "github.com/k4ties/sovapi"
+	"github.com/kr/pretty"
 )
 
 func main() {
@@ -17,9 +18,7 @@ func main() {
 
 	resp, err := api.PracticeMode(ctx)
 	if err != nil {
-		panic(fmt.Errorf("do player search: %w", err))
+		panic(fmt.Errorf("call /practice/mode: %w", err))
 	}
-	for i, p := range resp.Data {
-		fmt.Printf("%d) %s (%d); ranked=%t\n", i+1, p.DisplayName, p.ID, p.Ranked)
-	}
+	_, _ = pretty.Println(resp)
 }
