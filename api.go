@@ -12,7 +12,7 @@
 //	resp, err := api.PlayerSearch(ctx, "джавид")
 //	if err != nil {
 //	}
-//	 _ = resp
+//	_ = resp
 //
 // You can see more examples in "/example" directory
 package sova
