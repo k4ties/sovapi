@@ -2,6 +2,7 @@ package sova
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 )
 
@@ -22,6 +23,18 @@ var (
 	ErrRouteNotFound          = errors.New("route not found")
 	ErrNoSuchMode             = errors.New("no such mode")
 )
+
+type ErrUnmarshalResponse struct {
+	Parent error
+}
+
+func (e ErrUnmarshalResponse) Error() string {
+	return fmt.Sprintf("unmarshal response: %v", e.Parent)
+}
+
+func (e ErrUnmarshalResponse) Unwrap() error {
+	return e.Parent
+}
 
 var (
 	regPlayerNotFound = regexp.MustCompile(`No query results for model \[App\\Models\\Player\\Player] .*`)
