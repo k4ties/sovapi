@@ -61,7 +61,7 @@ func (api *API) PlayerSearch(ctx context.Context, query string) (*PlayerSearchRe
 		return nil, err
 	}
 	if len(resp.Data) == 0 {
-		return nil, ErrCannotFindPlayer
+		return nil, ErrCannotFindPlayer{Player: query}
 	}
 	return resp, nil
 }

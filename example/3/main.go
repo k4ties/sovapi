@@ -45,5 +45,5 @@ func searchExactPlayer(ctx context.Context, api *sova.API, name string) (sova.Pl
 			return p, nil
 		}
 	}
-	return sova.Player{}, sova.ErrCannotFindPlayer
+	return sova.Player{}, sova.ErrCannotFindPlayer{}
 }

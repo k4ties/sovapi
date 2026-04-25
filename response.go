@@ -1,5 +1,15 @@
 package sova
 
+var _ error = (*ResponseError)(nil)
+
+type ResponseError struct {
+	Message string `json:"message"`
+}
+
+func (e ResponseError) Error() string {
+	return e.Message
+}
+
 // player/{id}
 
 type Player struct {
