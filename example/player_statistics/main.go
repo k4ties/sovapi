@@ -19,7 +19,7 @@ func main() {
 	log := slog.Default()
 	api := sova.NewAPI()
 
-	p, err := searchExactPlayer(ctx, api, "lisswemiyyy")
+	p, err := searchExactPlayer(ctx, api, "lunarelly")
 	if err != nil {
 		panic(fmt.Errorf("search exact player: %w", err))
 	}

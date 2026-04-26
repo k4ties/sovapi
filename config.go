@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-type APIConfig struct {
+type Config struct {
 	Client         *http.Client
 	RequestTimeout time.Duration
 }
 
-func (conf APIConfig) New() *API {
+func (conf Config) New() *API {
 	if conf.Client == nil {
 		conf.Client = http.DefaultClient
 	}

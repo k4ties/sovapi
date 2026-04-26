@@ -4,6 +4,7 @@ var _ error = (*ResponseError)(nil)
 
 type ResponseError struct {
 	Message string `json:"message"`
+	Success *bool  `json:"success,omitempty"` //only appears in /store/verify-player
 }
 
 func (e ResponseError) Error() string {
@@ -64,4 +65,33 @@ type StatisticsEloLeaderboardResponse struct {
 	Data []RankedPlayerStatistic `json:"data"`
 }
 
-// TODO store api
+// store/verify-player
+
+type StoreVerifyPlayerResponse struct {
+	Data    []interface{} `json:"data"` // it returns empty slice of unknown type
+	Success bool          `json:"success"`
+}
+
+// store/ranks
+
+type StoreRank struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Purchasable bool   `json:"purchasable"`
+	Price       int    `json:"price"`
+}
+
+type StoreRanksResponse struct {
+	Data []StoreRank `json:"data"`
+}
+
+// store/items
+
+type StoreItem struct { // услуга
+	// TODO: ???
+}
+
+type StoreItemsResponse struct {
+	Data []StoreItem `json:"data"`
+}

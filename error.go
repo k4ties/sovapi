@@ -3,12 +3,12 @@ package sova
 import (
 	"errors"
 	"fmt"
+	"regexp"
+
+	"github.com/k4ties/sovapi/internal/errmatch"
 )
 
-var (
-	ErrNicknameMustBeTwoChars = errors.New("nickname must be at least 2 characters long")
-	ErrServerError            = errors.New("server error")
-)
+var ErrServerError = errors.New("server error")
 
 type ErrRouteNotFound struct {
 	Route string
@@ -32,25 +32,26 @@ func (e ErrNoSuchMode) Error() string {
 	return fmt.Sprintf("no such mode: %s", e.Mode)
 }
 
-type ErrCannotFindPlayer struct {
-	Player string
-}
-
-func (e ErrCannotFindPlayer) Error() string {
-	if e.Player == "" {
-		return "cannot find player"
-	}
-	return fmt.Sprintf("cannot find player: %s", e.Player)
-}
-
-type ErrUnmarshalResponse struct {
-	Parent error
-}
-
-func (e ErrUnmarshalResponse) Error() string {
-	return fmt.Sprintf("unmarshal response: %v", e.Parent)
-}
-
-func (e ErrUnmarshalResponse) Unwrap() error {
-	return e.Parent
+var errMatches = []errmatch.Entry{
+	{
+		Message: "Nickname must be at least 2 characters long",
+		Ret:     errmatch.Ret(ErrNicknameMustBeTwoChars),
+	},
+	{
+		Message: "Server Error",
+		Ret:     errmatch.Ret(ErrServerError),
+	},
+	{
+		Message: `No query results for model [App\Models\Player\Player].`, // it can also return like this
+		Regex:   regexp.MustCompile(`No query results for model \[App\\Models\\Player\\Player] (.*)`),
+		Ret:     func(m string) error { return ErrCannotFindPlayer{Player: m} },
+	},
+	{
+		Regex: regexp.MustCompile(`The route (.*) could not be found\.`),
+		Ret:   func(m string) error { return ErrRouteNotFound{Route: m} },
+	},
+	{
+		Regex: regexp.MustCompile(`No query results for model \[App\\Models\\Practice\\PracticeMode] (.*)`),
+		Ret:   func(m string) error { return ErrNoSuchMode{Mode: m} },
+	},
 }

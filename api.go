@@ -25,87 +25,19 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"unicode/utf8"
+
+	"github.com/k4ties/sovapi/internal/errmatch"
 )
 
 const RootURL = "https://api.sovamc.com/api/"
 
 func NewAPI() *API {
-	var conf APIConfig
+	var conf Config
 	return conf.New()
 }
 
 type API struct {
-	conf APIConfig
-}
-
-// Player ...
-//
-// /api/player/{id}
-func (api *API) Player(ctx context.Context, id int) (*PlayerResponse, error) {
-	return getAndUnmarshalf[PlayerResponse](
-		api, ctx,
-		"player/%d", id,
-	)
-}
-
-// PlayerSearch searches for a player with a specific query.
-//
-// /api/player/search/{query}
-func (api *API) PlayerSearch(ctx context.Context, query string) (*PlayerSearchResponse, error) {
-	if utf8.RuneCountInString(query) < 2 {
-		return nil, ErrNicknameMustBeTwoChars
-	}
-	resp, err := getAndUnmarshalf[PlayerSearchResponse](api, ctx, "player/search/%s", query)
-	if err != nil {
-		return nil, err
-	}
-	if len(resp.Data) == 0 {
-		return nil, ErrCannotFindPlayer{Player: query}
-	}
-	return resp, nil
-}
-
-// PracticeMode returns a list of all available practice modes, including
-// ranked.
-//
-// /api/practice/mode/
-func (api *API) PracticeMode(ctx context.Context) (*PracticeModeResponse, error) {
-	return getAndUnmarshal[PracticeModeResponse](
-		api, ctx,
-		"practice/mode",
-	)
-}
-
-// PracticeModeRanked returns a list of all available ranked practice modes.
-//
-// /api/practice/mode/ranked/
-func (api *API) PracticeModeRanked(ctx context.Context) (*PracticeModeResponse, error) {
-	return getAndUnmarshal[PracticeModeResponse](
-		api, ctx,
-		"practice/mode/ranked",
-	)
-}
-
-// PracticeStatisticsElo tries to get player statistics for all ranked modes.
-//
-// /api/practice/statistics/elo/{player_id}/
-func (api *API) PracticeStatisticsElo(ctx context.Context, id int) (*PracticeStatisticsEloResponse, error) {
-	return getAndUnmarshalf[PracticeStatisticsEloResponse](
-		api, ctx,
-		"practice/statistics/elo/%d", id,
-	)
-}
-
-// PracticeStatisticsLeaderboardElo fetches leaderboard entries (ranked players
-// statistics) for a specific mode by its id.
-//
-// /api/practice/statistics/leaderboard/elo/{mode_id}/
-func (api *API) PracticeStatisticsLeaderboardElo(ctx context.Context, modeID int) (*StatisticsEloLeaderboardResponse, error) {
-	return getAndUnmarshalf[StatisticsEloLeaderboardResponse](
-		api, ctx,
-		"practice/statistics/leaderboard/elo/%d", modeID,
-	)
+	conf Config
 }
 
 func (api *API) get(parent context.Context, path string) ([]byte, error) {
@@ -147,7 +79,7 @@ func unmarshalResponseError(data []byte) (error, bool) {
 	if err := json.Unmarshal(data, &resp); err != nil || resp.Message == "" {
 		return nil, false
 	}
-	if err := parseError(resp.Message); err != nil {
+	if err := errmatch.Match(errMatches, resp.Message); err != nil {
 		return err, true
 	}
 	// ResponseError implements error, so we can simply return it
@@ -170,6 +102,18 @@ func unmarshalResponse[T any](data []byte) (result *T, respErr bool, err error) 
 
 func getAndUnmarshalf[T any](api *API, ctx context.Context, f string, a ...any) (*T, error) {
 	return getAndUnmarshal[T](api, ctx, fmt.Sprintf(f, a...))
+}
+
+type ErrUnmarshalResponse struct {
+	Parent error
+}
+
+func (e ErrUnmarshalResponse) Error() string {
+	return fmt.Sprintf("unmarshal response: %v", e.Parent)
+}
+
+func (e ErrUnmarshalResponse) Unwrap() error {
+	return e.Parent
 }
 
 func getAndUnmarshal[T any](api *API, ctx context.Context, path string) (result *T, err error) {
