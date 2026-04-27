@@ -77,8 +77,11 @@ type StoreRanksResponse = []StoreRank
 
 // store/items
 
-type StoreItem struct { // услуга
-	// TODO: ???
+type StoreItem struct { // услуга (unmute/unban)
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Price       int    `json:"price"`
 }
 
 type StoreItemsResponse = []StoreItem
