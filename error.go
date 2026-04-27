@@ -1,12 +1,24 @@
 package sova
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
 
 	"github.com/k4ties/sovapi/internal/errmatch"
 )
+
+func unmarshalAndMatchResponseError(data []byte) error {
+	var resp ResponseError
+	if err := json.Unmarshal(data, &resp); err != nil || resp.Message == "" {
+		return nil
+	}
+	if err := errmatch.Match(errMatches, resp.Message); err != nil {
+		return err
+	}
+	return resp //implements error
+}
 
 var ErrServerError = errors.New("server error")
 
@@ -40,6 +52,10 @@ var errMatches = []errmatch.Entry{
 	{
 		Message: "Server Error",
 		Ret:     errmatch.Ret(ErrServerError),
+	},
+	{
+		Message: "Player not found",
+		Ret:     errmatch.Ret(ErrCannotFindPlayer{}),
 	},
 	{
 		Message: `No query results for model [App\Models\Player\Player].`, // it can also return like this

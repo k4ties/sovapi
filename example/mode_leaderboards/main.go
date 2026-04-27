@@ -33,8 +33,8 @@ func randomRankedMode(api *sova.API, ctx context.Context) sova.PracticeMode {
 	if err != nil {
 		panic(fmt.Errorf("call /practice/mode: %w", err))
 	}
-	if len(resp.Data) == 0 {
+	if len(resp) == 0 {
 		panic(errors.New("/api/practice/mode/: 0 modes in response"))
 	}
-	return resp.Data[rand.IntN(len(resp.Data))]
+	return resp[rand.IntN(len(resp))]
 }

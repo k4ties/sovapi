@@ -30,6 +30,9 @@ func (e Entry) findMatchRegex(msg string) (string, bool) {
 		return "", false
 	}
 	x := e.Regex.FindStringSubmatch(msg)
+	if len(x) == 0 {
+		return "", false
+	}
 	if e.FindMatch != nil {
 		return e.FindMatch(x)
 	}

@@ -21,12 +21,15 @@ func (e ErrNoModesAvailable) Error() string {
 // ranked.
 //
 // /api/practice/mode/
-func (api *API) PracticeMode(ctx context.Context) (*PracticeModeResponse, error) {
-	resp, err := getAndUnmarshal[PracticeModeResponse](api, ctx, "practice/mode")
+func (api *API) PracticeMode(ctx context.Context) (PracticeModeResponse, error) {
+	resp, err := getAndUnmarshal[PracticeModeResponse](
+		api, ctx,
+		"practice/mode",
+	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Data) == 0 {
+	if len(resp) == 0 {
 		return nil, ErrNoModesAvailable{}
 	}
 	return resp, nil
@@ -35,12 +38,15 @@ func (api *API) PracticeMode(ctx context.Context) (*PracticeModeResponse, error)
 // PracticeModeRanked returns a list of all available ranked practice modes.
 //
 // /api/practice/mode/ranked/
-func (api *API) PracticeModeRanked(ctx context.Context) (*PracticeModeResponse, error) {
-	resp, err := getAndUnmarshal[PracticeModeResponse](api, ctx, "practice/mode/ranked")
+func (api *API) PracticeModeRanked(ctx context.Context) (PracticeModeRankedResponse, error) {
+	resp, err := getAndUnmarshal[PracticeModeRankedResponse](
+		api, ctx,
+		"practice/mode/ranked",
+	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Data) == 0 {
+	if len(resp) == 0 {
 		return nil, ErrNoModesAvailable{Ranked: true}
 	}
 	return resp, nil
@@ -68,12 +74,15 @@ func (e ErrNoStatisticsAvailable) Error() string {
 // PracticeStatisticsElo tries to get player statistics for all ranked modes.
 //
 // /api/practice/statistics/elo/{player_id}/
-func (api *API) PracticeStatisticsElo(ctx context.Context, playerID int) (*PracticeStatisticsEloResponse, error) {
-	resp, err := getAndUnmarshalf[PracticeStatisticsEloResponse](api, ctx, "practice/statistics/elo/%d", playerID)
+func (api *API) PracticeStatisticsElo(ctx context.Context, playerID int) (PracticeStatisticsEloResponse, error) {
+	resp, err := getAndUnmarshal[PracticeStatisticsEloResponse](
+		api, ctx,
+		f("practice/statistics/elo/%d", playerID),
+	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Data) == 0 {
+	if len(resp) == 0 {
 		return nil, ErrNoStatisticsAvailable{Type: RankedStatisticsTypePlayer, For: strconv.Itoa(playerID)}
 	}
 	return resp, nil
@@ -83,12 +92,15 @@ func (api *API) PracticeStatisticsElo(ctx context.Context, playerID int) (*Pract
 // statistics) for a specific mode by its id.
 //
 // /api/practice/statistics/leaderboard/elo/{mode_id}/
-func (api *API) PracticeStatisticsLeaderboardElo(ctx context.Context, modeID int) (*StatisticsEloLeaderboardResponse, error) {
-	resp, err := getAndUnmarshalf[StatisticsEloLeaderboardResponse](api, ctx, "practice/statistics/leaderboard/elo/%d", modeID)
+func (api *API) PracticeStatisticsLeaderboardElo(ctx context.Context, modeID int) (StatisticsEloLeaderboardResponse, error) {
+	resp, err := getAndUnmarshal[StatisticsEloLeaderboardResponse](
+		api, ctx,
+		f("practice/statistics/leaderboard/elo/%d", modeID),
+	)
 	if err != nil {
 		return nil, err
 	}
-	if len(resp.Data) == 0 {
+	if len(resp) == 0 {
 		return nil, ErrNoStatisticsAvailable{Type: RankedStatisticsTypeMode, For: strconv.Itoa(modeID)}
 	}
 	return resp, nil

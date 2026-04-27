@@ -3,9 +3,9 @@
 //
 //	api := sova.New()
 //
-// Or using the config APIConfig:
+// Or using the Config:
 //
-//	api := sova.APIConfig{...}.New()
+//	api := sova.Config{...}.New()
 //
 // Then you can call methods easily:
 //
@@ -24,9 +24,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	"net/url"
 
-	"github.com/k4ties/sovapi/internal/errmatch"
+	"github.com/k4ties/sovapi/internal"
 )
 
 const RootURL = "https://api.sovamc.com/api/"
@@ -40,9 +40,11 @@ type API struct {
 	conf Config
 }
 
-func (api *API) get(parent context.Context, path string) ([]byte, error) {
-	path = RootURL + strings.TrimPrefix(path, "/") //maybe url.JoinPath would be usable here
-
+func (api *API) get(parent context.Context, endpoint string) ([]byte, error) {
+	path, err := url.JoinPath(RootURL, endpoint)
+	if err != nil {
+		return nil, fmt.Errorf("join path: %w", err)
+	}
 	ctx, cancel := context.WithTimeout(parent, api.conf.RequestTimeout)
 	defer cancel()
 
@@ -50,7 +52,7 @@ func (api *API) get(parent context.Context, path string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("new request: %w", err)
 	}
-	res, err := doRequest(api.conf.Client, req)
+	res, err := api.doRequest(req)
 	if err != nil {
 		return nil, fmt.Errorf("do request: %w", err)
 	}
@@ -63,8 +65,8 @@ func (api *API) get(parent context.Context, path string) ([]byte, error) {
 	return data, nil
 }
 
-func doRequest(client *http.Client, req *http.Request) (*http.Response, error) {
-	resp, err := client.Do(req)
+func (api *API) doRequest(req *http.Request) (*http.Response, error) {
+	resp, err := api.conf.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -74,34 +76,35 @@ func doRequest(client *http.Client, req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func unmarshalResponseError(data []byte) (error, bool) {
-	var resp ResponseError
-	if err := json.Unmarshal(data, &resp); err != nil || resp.Message == "" {
-		return nil, false
+var ErrResponseDoesntMatchSignature = errors.New("response doesnt matches deafult signature (missing Data field)")
+
+func unmarshalResponseAsData[T any](data []byte) (T, bool, error) {
+	var zero T
+	type resp struct {
+		Data    *T    `json:"data,omitempty"`
+		Success *bool `json:"success,omitempty"`
 	}
-	if err := errmatch.Match(errMatches, resp.Message); err != nil {
-		return err, true
+	res, respErr, err := unmarshalResponseAsStruct[resp](data)
+	if err != nil {
+		return zero, respErr, err
 	}
-	// ResponseError implements error, so we can simply return it
-	return resp, true
+	if res.Data == nil {
+		return zero, false, ErrResponseDoesntMatchSignature
+	}
+	return *res.Data, true, nil
 }
 
-// the following methods should be API private methods, but they can't only
-// because of Go doesn't support generics that way
+var ErrUnhandledResponseType = errors.New("unhandled (invalid) response type")
 
-func unmarshalResponse[T any](data []byte) (result *T, respErr bool, err error) {
-	if err, ok := unmarshalResponseError(data); ok {
-		return nil, true, err
+func unmarshalResponseAsStruct[T any](data []byte) (res T, respErr bool, err error) {
+	if err := unmarshalAndMatchResponseError(data); err != nil {
+		return res, true, err
 	}
-	var resp *T
+	var resp T
 	if err := json.Unmarshal(data, &resp); err == nil {
 		return resp, false, nil
 	}
-	return nil, false, errors.New("invalid (unhandled) response type")
-}
-
-func getAndUnmarshalf[T any](api *API, ctx context.Context, f string, a ...any) (*T, error) {
-	return getAndUnmarshal[T](api, ctx, fmt.Sprintf(f, a...))
+	return res, false, ErrUnhandledResponseType
 }
 
 type ErrUnmarshalResponse struct {
@@ -112,25 +115,34 @@ func (e ErrUnmarshalResponse) Error() string {
 	return fmt.Sprintf("unmarshal response: %v", e.Parent)
 }
 
-func (e ErrUnmarshalResponse) Unwrap() error {
-	return e.Parent
-}
-
-func getAndUnmarshal[T any](api *API, ctx context.Context, path string) (result *T, err error) {
-	data, err := api.get(ctx, path)
+func getAndUnmarshal[T any](api *API, ctx context.Context, endpoint string, asStruct ...bool) (res T, err error) {
+	data, err := api.get(ctx, endpoint)
 	if err != nil {
-		return nil, err
+		return res, err
 	}
-	resp, respErr, err := unmarshalResponse[T](data)
+	var (
+		resp    T
+		respErr bool
+	)
+	if internal.HasTrueOption(asStruct) {
+		resp, respErr, err = unmarshalResponseAsStruct[T](data)
+	} else {
+		resp, respErr, err = unmarshalResponseAsData[T](data)
+	}
 	if err == nil {
 		// success
 		return resp, nil
 	}
 	if respErr {
 		// return error directly if it is extracted from ResponseError
-		return nil, err
+		return res, err
 	}
-	return nil, ErrUnmarshalResponse{Parent: err}
+	return res, ErrUnmarshalResponse{Parent: err}
+}
+
+// f is shorter alias for fmt.Sprintf.
+func f(f string, a ...any) string {
+	return fmt.Sprintf(f, a...)
 }
 
 // TODO account api .................

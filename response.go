@@ -18,17 +18,13 @@ type Player struct {
 	Nickname string `json:"nickname"`
 }
 
-type PlayerResponse struct {
-	Data *Player `json:"data"`
-}
+type PlayerResponse = Player
 
 // player/search
 
-type PlayerSearchResponse struct {
-	Data []Player `json:"data"`
-}
+type PlayerSearchResponse = []Player
 
-// practice/mode; practice/mode/ranked
+// practice/mode
 
 type PracticeMode struct {
 	ID          int    `json:"id"`
@@ -37,9 +33,11 @@ type PracticeMode struct {
 	Ranked      bool   `json:"ranked"`
 }
 
-type PracticeModeResponse struct {
-	Data []PracticeMode `json:"data"`
-}
+type PracticeModeResponse = []PracticeMode
+
+// practice/mode/ranked
+
+type PracticeModeRankedResponse = []PracticeMode
 
 // practice/statistics/elo/{player_id}
 
@@ -49,9 +47,7 @@ type RankedModeStatistic struct {
 	Elo      int    `json:"amount"`
 }
 
-type PracticeStatisticsEloResponse struct {
-	Data []RankedModeStatistic `json:"data"`
-}
+type PracticeStatisticsEloResponse = []RankedModeStatistic
 
 // practice/statistics/leaderboard/elo/{mode_id}
 
@@ -61,16 +57,11 @@ type RankedPlayerStatistic struct {
 	Elo      int    `json:"amount"`
 }
 
-type StatisticsEloLeaderboardResponse struct {
-	Data []RankedPlayerStatistic `json:"data"`
-}
+type StatisticsEloLeaderboardResponse = []RankedPlayerStatistic
 
 // store/verify-player
 
-type StoreVerifyPlayerResponse struct {
-	Data    []interface{} `json:"data"` // it returns empty slice of unknown type
-	Success bool          `json:"success"`
-}
+type StoreVerifyPlayerResponse = bool
 
 // store/ranks
 
@@ -82,9 +73,7 @@ type StoreRank struct {
 	Price       int    `json:"price"`
 }
 
-type StoreRanksResponse struct {
-	Data []StoreRank `json:"data"`
-}
+type StoreRanksResponse = []StoreRank
 
 // store/items
 
@@ -92,6 +81,4 @@ type StoreItem struct { // услуга
 	// TODO: ???
 }
 
-type StoreItemsResponse struct {
-	Data []StoreItem `json:"data"`
-}
+type StoreItemsResponse = []StoreItem

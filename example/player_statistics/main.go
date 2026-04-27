@@ -40,7 +40,7 @@ func searchExactPlayer(ctx context.Context, api *sova.API, name string) (sova.Pl
 	if err != nil {
 		return sova.Player{}, fmt.Errorf("call /api/player/search: %w", err)
 	}
-	for _, p := range resp.Data {
+	for _, p := range resp {
 		if strings.EqualFold(p.Nickname, name) {
 			return p, nil
 		}

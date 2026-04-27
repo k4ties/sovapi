@@ -18,8 +18,13 @@ func main() {
 
 	api := sova.NewAPI()
 
+	verifyPlayer(ctx, api)
 	logStoreRanks(ctx, api)
 	logStoreItems(ctx, api)
+}
+
+func verifyPlayer(ctx context.Context, api *sova.API) {
+	_, _ = pretty.Printf("player %q exists: %t\n", player, api.StoreVerifyPlayerDirect(ctx, player))
 }
 
 func logStoreRanks(ctx context.Context, api *sova.API) {
