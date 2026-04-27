@@ -12,6 +12,8 @@ import (
 	"github.com/kr/pretty"
 )
 
+const player = "lunarelly"
+
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
@@ -19,7 +21,7 @@ func main() {
 	log := slog.Default()
 	api := sova.NewAPI()
 
-	p, err := searchExactPlayer(ctx, api, "lunarelly")
+	p, err := searchExactPlayer(ctx, api, player)
 	if err != nil {
 		panic(fmt.Errorf("search exact player: %w", err))
 	}
