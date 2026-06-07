@@ -29,7 +29,7 @@ import (
 	"github.com/k4ties/sovapi/internal"
 )
 
-const RootURL = "https://api.sovamc.com/api/"
+const RootURL = "https://api.sovamc.club/api/"
 
 func NewAPI() *API {
 	var conf Config
