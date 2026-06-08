@@ -107,8 +107,7 @@ var ErrResponseDoesntMatchSignature = errors.New("response doesnt match deafult 
 func unmarshalResponseAsData[T any](data []byte) (T, bool, error) {
 	var zero T
 	type resp struct {
-		Data    *T    `json:"data,omitempty"`
-		Success *bool `json:"success,omitempty"`
+		Data *T `json:"data,omitempty"`
 	}
 	res, respErr, err := unmarshalResponseAsStruct[resp](data)
 	if err != nil {
