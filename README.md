@@ -1,2 +1,2 @@
 # sovapi
-Golang implementation of sovamc.com API
+Golang implementation of sovamc.club API

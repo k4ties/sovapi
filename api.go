@@ -1,4 +1,4 @@
-// Package sova is a wrapper for sovamc.com API.
+// Package sova is a wrapper for sovamc.club API.
 // You can create API instance with sova.New(), just like:
 //
 //	api := sova.New()
