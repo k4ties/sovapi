@@ -17,6 +17,7 @@ func (api *API) ServerOnline(ctx context.Context) (ServerOnline, error) {
 	}](
 		api, ctx,
 		"server/online",
+		true,
 	)
 	if err != nil {
 		return ServerOnline{}, err
