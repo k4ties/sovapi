@@ -209,3 +209,9 @@ type StoreItem struct { // услуга (unmute/unban)
 }
 
 type StoreItemsResponse = []StoreItem
+
+// server/online
+
+type ServerOnline struct {
+	Online int `json:"online"`
+}
