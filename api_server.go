@@ -12,8 +12,8 @@ var ErrUnsuccessResponse = errors.New("unsuccess response")
 // /api/server/online/
 func (api *API) ServerOnline(ctx context.Context) (ServerOnline, error) {
 	resp, err := getAndUnmarshal[struct {
-		Success bool
-		Data    ServerOnline
+		Success bool         `json:"success"`
+		Data    ServerOnline `json:"data"`
 	}](
 		api, ctx,
 		"server/online",
